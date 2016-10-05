@@ -13,13 +13,15 @@ upper_bound = 90    # highest angle to test
 timestep = 1 		# days
 
 # wave & coastline parameters
-A = .5		# fraction of waves approaching from left
-U = .5		# fraction of waves approaching from high angles
+Asymmetry = .5		# A, fraction of waves approaching from left
+Highness = .5		# u, fraction of waves approaching from high angles
 
 OffShoreWvHt = 1    	# offhsore wave height (m)
 Period = 10      		# offshore wave period (s)
 DepthShoreface = 10 	# depth of shoreface (m)
 cellwidth = 100 		# cell width for volume calculations (m)
+
+np.random.seed(1234)
 
 
 """ Determine which angles to test. """
@@ -31,15 +33,16 @@ QsNet = np.zeroslike(angles)
 """ Begin time loop. """
 
 """ Calculate wave angle for current timestep. """
-# call function here, need A, U, random seed?
-# WaveAngle = function
+
+WaveAngle = WavesNextAngle(Asymmetry,Highness)
+
 
 """ Loop through angles to determine sediment transport. """
 for i in xrange(len(angles)):
 
 	AngleDeep = WaveAngle - angles[i]
 
-	if (AngleDeep > pi/2.0) or (AngleDeep < -pi/2.0):
+	if (AngleDeep > np.pi/2.0) or (AngleDeep < -np.pi/2.0):
 		Qs = 0
 	else:
 		Qs = DetermineTransport(AngleDeep,OffShoreWvHt,Period
@@ -62,7 +65,7 @@ def DetermineTransport(AngleDeep,OffShoreWvHt,Period,DepthShoreface,cellwidth,ti
 	rho = 1020			# kg/m^3, density of water + dissolved matter
 
 	# calculate deep water celerity & length, Komar 5.11
-	CDeep = g * Period / (2.0 * pi)
+	CDeep = g * Period / (2.0 * np.pi)
 	LDeep = CDeep * Period
 
 	Depth = StartDepth	# water depth for current iteration
@@ -71,11 +74,11 @@ def DetermineTransport(AngleDeep,OffShoreWvHt,Period,DepthShoreface,cellwidth,ti
 	while refracting: 
 
 		# non-iterative eqn for L, from Fenton & McKee
-		WaveLength = LDeep * (np.tanh((((2.0*pi/Period)^2) * (Depth/g))^(3/4)))^(2/3)
+		WaveLength = LDeep * (np.tanh((((2.0*np.pi/Period)^2) * (Depth/g))^(3/4)))^(2/3)
 
 		C = WaveLength / Period
 
-		kh = pi * Depth / WaveLength
+		kh = np.pi * Depth / WaveLength
 
 		# from Komar 5.21
 		# NOTE: CHECK - COMMENTS IN CEM DON'T MATCH CODE
@@ -94,15 +97,29 @@ def DetermineTransport(AngleDeep,OffShoreWvHt,Period,DepthShoreface,cellwidth,ti
 		else:
 			Depth -= RefractStep
 
-		# calculate volume transported
-		VolumeTrans = np.absolute(1.1 * rho * (g^(3/2)) * (WvHeight^(12/5)) * \
-					  np.cos(Angle) * np.sin(Angle) * timestep)
-	
-		# adjust volume to a flux
-		VolAdjust = 1.0/cellwidth/cellwidth/DepthShoreface
-		vv = VolumeTrans * VolAdjust
+	# calculate volume transported
+	VolumeTrans = np.absolute(1.1 * rho * (g^(3/2)) * (WvHeight^(12/5)) * \
+				  np.cos(Angle) * np.sin(Angle) * timestep)
 
-		return vv
+	# adjust volume to a flux
+	VolAdjust = 1.0/cellwidth/cellwidth/DepthShoreface
+	vv = VolumeTrans * VolAdjust
+
+	return vv
+
+def WavesNextAngle(Asymmetry,Highness):
+
+	f = np.random.rand()
+
+	if (f > Highness):
+		angle = (f - Highness) / (1. - Highness) * np.pi * 0.25
+	else:
+		angle = ((f / Highness) + 1.) * np.pi * 0.25
+
+	if (np.random.rand() > Asymmetry):
+		angle *= -1.
+
+	return angle
 
 
 
