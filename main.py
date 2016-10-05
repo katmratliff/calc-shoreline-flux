@@ -3,7 +3,6 @@
 import numpy as np
 import calc_angle
 import calc_trans
-import pudb
 
 
 """ Parameters """
@@ -25,8 +24,6 @@ DepthShoreface = 10 	# depth of shoreface (m)
 cellwidth = 100 		# cell width for volume calculations (m)
 
 np.random.seed(1234)
-
-pu.db
 
 """ Determine which angles to test. """
 angles_deg = np.linspace(lower_bound, upper_bound, num=no_angles)
