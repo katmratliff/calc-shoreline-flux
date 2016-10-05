@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import matplotlib.pyplot as plt
 import numpy as np
 import calc_angle
 import calc_trans
@@ -12,11 +13,11 @@ lower_bound = -90     # lowest angle to test
 upper_bound = 90    # highest angle to test
 
 timestep = 1 		# days
-time_max = 10		# days
+time_max = 5000		# days
 
 # wave & coastline parameters
 Asymmetry = .5		# A, fraction of waves approaching from left
-Highness = .5		# u, fraction of waves approaching from high angles
+Highness = .2		# u, fraction of waves approaching from high angles
 
 OffShoreWvHt = 1    	# offhsore wave height (m)
 Period = 10      		# offshore wave period (s)
@@ -57,6 +58,26 @@ for k in xrange(0, time_max, timestep):
 		else:
 			QsNet[i] -= Qs
 
-np.savetxt('angles_tested',angles_deg,'%.3f')
-np.savetxt('wave_angles',wave_angles,'%.3f')
-np.savetxt('Qs_net',QsNet,'%.5f')
+max_loc_value = [angles_deg[np.argmax(QsNet)], np.amax(QsNet)]
+
+f = plt.figure()
+plt.hist(wave_angles, 30)
+plt.title('wave angles')
+plt.xlabel('angle')
+plt.ylabel('frequency')
+plt.savefig('binned_wave_angles.png')
+plt.close(f)
+
+p = plt.figure()
+plt.plot(angles_deg, np.fabs(QsNet))
+# plt.plot(np.argmax(QsNet), np.amax(QsNet), s=2)
+plt.axis([lower_bound, upper_bound, 0, np.amax(QsNet) + 0.1*np.amax(QsNet)])
+plt.xlabel('shoreline angle')
+plt.ylabel('net Qs')
+plt.savefig('qs_net_fig.png')
+plt.close(p)
+
+np.savetxt('angles_tested.out',angles_deg,'%.3f')
+np.savetxt('wave_angles.out',wave_angles,'%.3f')
+np.savetxt('Qs_net.out',QsNet,'%.5f')
+np.savetxt('max_value.out',max_loc_value,'%.5f')
