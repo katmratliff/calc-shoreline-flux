@@ -16,8 +16,8 @@ timestep = 1 		# days
 time_max = 5000		# days
 
 # wave & coastline parameters
-Asymmetry = .5		# A, fraction of waves approaching from left
-Highness = .2		# u, fraction of waves approaching from high angles
+Asymmetry = .5		# A, fraction of waves approaching from left (0<A<1)
+Highness = .2		# u, fraction of waves approaching from high angles (0<U<1)
 
 OffShoreWvHt = 1    	# offhsore wave height (m)
 Period = 10      		# offshore wave period (s)
@@ -69,9 +69,10 @@ plt.savefig('binned_wave_angles.png')
 plt.close(f)
 
 p = plt.figure()
-plt.plot(angles_deg, np.fabs(QsNet))
+plt.plot(angles_deg, QsNet)
 # plt.plot(np.argmax(QsNet), np.amax(QsNet), s=2)
-plt.axis([lower_bound, upper_bound, 0, np.amax(QsNet) + 0.1*np.amax(QsNet)])
+plt.axis([lower_bound, upper_bound, np.amin(QsNet) - 0.1*np.fabs(np.amin(QsNet)),
+		  np.amax(QsNet) + 0.1*np.amax(QsNet)])
 plt.xlabel('shoreline angle')
 plt.ylabel('net Qs')
 plt.savefig('qs_net_fig.png')
