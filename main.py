@@ -9,8 +9,8 @@ import calc_trans
 """ Parameters """
 
 no_angles = 181      # how many angles to use
-lower_bound = -90     # lowest angle to test
-upper_bound = 90    # highest angle to test
+lower_bound = -180     # lowest angle to test
+upper_bound = 180  # highest angle to test
 
 timestep = 1 		# days
 time_max = 5000		# days
@@ -27,7 +27,7 @@ cellwidth = 100 		# cell width for volume calculations (m)
 np.random.seed(1234)
 
 """ Determine which angles to test. """
-angles_deg = np.linspace(lower_bound, upper_bound, num=no_angles)
+angles_deg = np.linspace(upper_bound, lower_bound, num=no_angles)
 angles = np.deg2rad(angles_deg)
 
 wave_angles = np.zeros(time_max)
@@ -69,12 +69,12 @@ plt.savefig('binned_wave_angles.png')
 plt.close(f)
 
 p = plt.figure()
-plt.plot(angles_deg, QsNet)
+plt.plot(angles_deg, QsNet/time_max)
 # plt.plot(np.argmax(QsNet), np.amax(QsNet), s=2)
-plt.axis([lower_bound, upper_bound, np.amin(QsNet) - 0.1*np.fabs(np.amin(QsNet)),
+plt.axis([upper_bound, lower_bound, np.amin(QsNet) - 0.1*np.fabs(np.amin(QsNet)),
 		  np.amax(QsNet) + 0.1*np.amax(QsNet)])
 plt.xlabel('shoreline angle')
-plt.ylabel('net Qs')
+plt.ylabel('Qs/day')
 plt.savefig('qs_net_fig.png')
 plt.close(p)
 
